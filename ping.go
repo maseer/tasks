@@ -6,7 +6,7 @@ type Ping struct {
 	ToMultiple bool
 }
 
-func NewPing(data interface{}, result map[string]interface{}) *Ping {
+func newPing(data interface{}, result map[string]interface{}) *Ping {
 	return &Ping{
 		Data:   data,
 		Result: &Result{},
@@ -26,7 +26,7 @@ func cloneResult(src *Result) *Result {
 	return r
 }
 
-func (p *Ping) Clone(data interface{}) *Ping {
+func (p *Ping) clone(data interface{}) *Ping {
 	clone := &Ping{
 		Result: cloneResult(p.Result),
 		Data:   data,

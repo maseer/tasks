@@ -8,25 +8,25 @@ import (
 const defaultThreadNumb = 128
 
 type Task struct {
-	ctx         context.Context
-	cancle      func()
-	doms        []*Layout
-	index       int
-	watcher     *Watcher
-	resultChanl chan *Result
-	preAdd      uintptr
-	Limit       int
+	ctx             context.Context
+	cancle          func()
+	doms            []*Layout
+	index           int
+	watcher         *watcher
+	resultChanl     chan *Result
+	preAdd          uintptr
+	LimitThreadNumb int
 }
 
 func New() *Task {
 	ctx, cancle := context.WithCancel(context.Background())
 	r := make(chan *Result)
 	return &Task{
-		cancle:      cancle,
-		ctx:         ctx,
-		watcher:     NewWatcher(r),
-		resultChanl: r,
-		Limit:       defaultThreadNumb,
+		cancle:          cancle,
+		ctx:             ctx,
+		watcher:         newWatcher(r),
+		resultChanl:     r,
+		LimitThreadNumb: defaultThreadNumb,
 	}
 }
 
@@ -47,7 +47,7 @@ func (t *Task) Add(f ...Handler) {
 
 func (t *Task) addOne(f Handler) {
 	pt := reflect.ValueOf(f).Pointer()
-	lt := NewLayout(pt, t, f)
+	lt := newLayout(pt, t, f)
 	t.doms = append(t.doms, lt)
 	t.bindPre(lt, t.preAdd)
 	t.preAdd = pt
@@ -55,16 +55,16 @@ func (t *Task) addOne(f Handler) {
 }
 
 func (t *Task) startInit(data []int) {
-	p := NewPing(data, make(map[string]interface{}))
+	p := newPing(data, make(map[string]interface{}))
 	p.ToMultiple = true
-	t.doms[0].start(p)
+	if len(t.doms) > 0 {
+		t.doms[0].start(p)
+	} else {
+		t.resultChanl <- &Result{index: 1}
+	}
 }
 
-func (t *Task) StartInt(data []int) {
-	go t.startInit(data)
-}
-
-func (t *Task) Wait() []*Result {
+func (t *Task) wait() []*Result {
 	res := []*Result{}
 	for r1 := range t.resultChanl {
 		i := r1.index
@@ -73,4 +73,9 @@ func (t *Task) Wait() []*Result {
 		t.watcher.check()
 	}
 	return res
+}
+
+func (t *Task) Begin(data []int) []*Result {
+	go t.startInit(data)
+	return t.wait()
 }

@@ -5,46 +5,46 @@ import (
 	"sync"
 )
 
-type Watcher struct {
-	conter []*StepCounter
+type watcher struct {
+	conter []*stepCounter
 	lock   sync.Mutex
 	max    int
 	result chan *Result
 }
 
-type StepCounter struct {
+type stepCounter struct {
 	todo int
 	fin  int
 }
 
-func NewWatcher(r chan *Result) *Watcher {
-	return &Watcher{
+func newWatcher(r chan *Result) *watcher {
+	return &watcher{
 		result: r,
 	}
 }
 
-func (c *Watcher) init(step int) {
+func (c *watcher) init(step int) {
 	if (step + 1) > c.max {
-		c.conter = append(c.conter, &StepCounter{})
+		c.conter = append(c.conter, &stepCounter{})
 		c.max = step + 1
 	}
 }
 
-func (c *Watcher) Add(step int, i int) {
+func (c *watcher) Add(step int, i int) {
 	c.lock.Lock()
 	c.init(step)
 	c.conter[step].todo += i
 	c.lock.Unlock()
 }
 
-func (c *Watcher) Done(step int) {
+func (c *watcher) Done(step int) {
 	c.lock.Lock()
 	c.init(step)
 	c.conter[step].fin += 1
 	c.lock.Unlock()
 }
 
-func (c *Watcher) check() {
+func (c *watcher) check() {
 	pnt := ``
 	for _, v := range c.conter {
 		pnt += fmt.Sprintf("[%d/%d] ", v.fin, v.todo)

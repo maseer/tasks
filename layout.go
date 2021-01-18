@@ -17,14 +17,14 @@ type Layout struct {
 	limit      chan int
 }
 
-func NewLayout(id uintptr, t *Task, f Handler) *Layout {
+func newLayout(id uintptr, t *Task, f Handler) *Layout {
 	lt := &Layout{
 		handleFunc: f,
 		ID:         id,
 		ctx:        t.ctx,
 		level:      t.index,
 		task:       t,
-		limit:      make(chan int, t.Limit),
+		limit:      make(chan int, t.LimitThreadNumb),
 	}
 	return lt
 }
@@ -56,5 +56,5 @@ func (lt *Layout) isLast() bool {
 }
 
 func (lt *Layout) start(p *Ping) {
-	lt.FirstRun(p)
+	lt.firstRun(p)
 }

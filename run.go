@@ -13,24 +13,24 @@ func copyPings(ping *Ping, data interface{}) ([]*Ping, error) {
 	}
 	for i := 0; i < dataF.Len(); i++ {
 		d := dataF.Index(i)
-		n := ping.Clone(d.Interface())
+		n := ping.clone(d.Interface())
 		ps = append(ps, n)
 	}
 	return ps, nil
 }
 
 func (lt *Layout) handlePings(ping *Ping, data interface{}) ([]*Ping, error) {
-	if lt.next == nil {
-		return nil, nil
-	}
+	// if lt.next == nil {
+	// 	return nil, nil
+	// }
 	if !ping.ToMultiple {
-		return []*Ping{ping.Clone(ping.Data)}, nil
+		return []*Ping{ping.clone(ping.Data)}, nil
 	}
 	ps, err := copyPings(ping, data)
 	return ps, err
 }
 
-func (lt *Layout) FirstRun(ping *Ping) error {
+func (lt *Layout) firstRun(ping *Ping) error {
 	ps, err := lt.handlePings(ping, ping.Data)
 	if err != nil {
 		return err
@@ -41,7 +41,7 @@ func (lt *Layout) FirstRun(ping *Ping) error {
 func next(ps []*Ping, next *Layout) {
 	next.upateWatcher(len(ps))
 	for _, v := range ps {
-		go Run(v, next)
+		go run(v, next)
 	}
 }
 
@@ -61,7 +61,7 @@ func (lt *Layout) runHandle(ping *Ping) (interface{}, error) {
 	return a, err
 }
 
-func Run(ping *Ping, lt *Layout) {
+func run(ping *Ping, lt *Layout) {
 	resData, err := lt.runHandle(ping)
 	lt.Fin(ping, resData, err)
 	if lt.next == nil || err != nil {
