@@ -62,10 +62,5 @@ func run(ping *Ping, lt *Layout) {
 		return
 	}
 	ps := lt.handlePings(ping, resData)
-	if err != nil {
-		panic(err)
-	}
-	if lt.next != nil {
-		next(ps, lt.next)
-	}
+	next(ps, lt.next)
 }
