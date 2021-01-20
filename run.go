@@ -24,7 +24,7 @@ func (lt *Layout) handlePings(ping *Ping, data interface{}) ([]*Ping, error) {
 	// 	return nil, nil
 	// }
 	if !ping.ToMultiple {
-		return []*Ping{ping.clone(ping.Data)}, nil
+		return []*Ping{ping.clone(data)}, nil
 	}
 	ps, err := copyPings(ping, data)
 	return ps, err
