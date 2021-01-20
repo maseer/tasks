@@ -5,39 +5,33 @@ import (
 	"reflect"
 )
 
-func copyPings(ping *Ping, data interface{}) ([]*Ping, error) {
+func mustCopyPings(ping *Ping, data interface{}) []*Ping {
 	ps := []*Ping{}
 	dataF := reflect.ValueOf(data)
 	if dataF.Kind() != reflect.Slice {
-		return nil, errors.New("handleMultiple error, data type must be slice")
+		panic(errors.New("handleMultiple error, data type must be slice"))
 	}
 	for i := 0; i < dataF.Len(); i++ {
 		d := dataF.Index(i)
 		n := ping.clone(d.Interface())
 		ps = append(ps, n)
 	}
-	return ps, nil
+	return ps
 }
 
-func (lt *Layout) handlePings(ping *Ping, data interface{}) ([]*Ping, error) {
-	// if lt.next == nil {
-	// 	return nil, nil
-	// }
+func (lt *Layout) handlePings(ping *Ping, data interface{}) []*Ping {
 	if !ping.ToMultiple {
-		return []*Ping{ping.clone(data)}, nil
+		return []*Ping{ping.clone(data)}
 	}
-	ps, err := copyPings(ping, data)
-	return ps, err
+	ps := mustCopyPings(ping, data)
+	return ps
 }
 
-func (lt *Layout) firstRun(ping *Ping) error {
-	ps, err := lt.handlePings(ping, ping.Data)
-	if err != nil {
-		return err
-	}
+func (lt *Layout) firstRun(ping *Ping) {
+	ps := lt.handlePings(ping, ping.Data)
 	next(ps, lt)
-	return nil
 }
+
 func next(ps []*Ping, next *Layout) {
 	next.upateWatcher(len(ps))
 	for _, v := range ps {
@@ -67,7 +61,7 @@ func run(ping *Ping, lt *Layout) {
 	if lt.next == nil || err != nil {
 		return
 	}
-	ps, err := lt.handlePings(ping, resData)
+	ps := lt.handlePings(ping, resData)
 	if err != nil {
 		panic(err)
 	}

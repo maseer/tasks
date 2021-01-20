@@ -54,7 +54,7 @@ func (t *Task) addOne(f Handler) {
 	t.index++
 }
 
-func (t *Task) startInit(data []int) {
+func (t *Task) startInit(data interface{}) {
 	p := newPing(data, make(map[string]interface{}))
 	p.ToMultiple = true
 	if len(t.doms) > 0 {
@@ -76,6 +76,11 @@ func (t *Task) wait() []*Result {
 }
 
 func (t *Task) Begin(data []int) []*Result {
+	go t.startInit(data)
+	return t.wait()
+}
+
+func (t *Task) BeginString(data []string) []*Result {
 	go t.startInit(data)
 	return t.wait()
 }
