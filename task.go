@@ -75,11 +75,15 @@ func (t *Task) wait() []*Result {
 	return res
 }
 
-func (t *Task) Begin(data []int) []*Result {
+func (t *Task) Begin(data interface{}) []*Result {
 	go t.startInit(data)
 	return t.wait()
 }
 
+func (t *Task) BeginInt(data []int) []*Result {
+	go t.startInit(data)
+	return t.wait()
+}
 func (t *Task) BeginString(data []string) []*Result {
 	go t.startInit(data)
 	return t.wait()
