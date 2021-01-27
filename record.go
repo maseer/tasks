@@ -21,10 +21,7 @@ func newRecord() Record {
 }
 
 func mustReadRecord() Record {
-	r, err := readRecord()
-	if err != nil {
-		fmt.Println(err)
-	}
+	r, _ := readRecord()
 	return r
 }
 
@@ -63,6 +60,10 @@ func (r *Record) save() error {
 }
 
 func (t *Task) End(p *Ping) {
+	if !t.UseRecord {
+		return
+	}
+
 	dataRecordLock.Lock()
 	defer dataRecordLock.Unlock()
 

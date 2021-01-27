@@ -1,7 +1,5 @@
 package tasks
 
-import "fmt"
-
 type Handler func(i interface{}, p *Ping) (interface{}, error)
 
 func (t *Task) upateWatcher(ps []*Ping) {
@@ -43,13 +41,11 @@ func runFromRecord(ping *Ping) (*Ping, bool) {
 
 func (t *Task) runHandle(ping *Ping) (interface{}, error) {
 	nping, ok := runFromRecord(ping)
-	if ok && !nping.HasError {
+	if t.UseRecord && ok && !nping.HasError {
 		ping.ToMultiple = nping.ToMultiple
 		ping.Result = nping.Result
 		ping.DataEnd = nping.DataEnd
 		return nping.DataEnd, nil
-	}else{
-		fmt.Println("oo")
 	}
 
 	lt := t.doms[ping.Level]

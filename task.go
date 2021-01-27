@@ -17,6 +17,7 @@ type Task struct {
 	resultChanl     chan *Ping
 	preAdd          uintptr
 	LimitThreadNumb int
+	UseRecord       bool
 }
 
 func New() *Task {
@@ -28,6 +29,7 @@ func New() *Task {
 		watcher:         newWatcher(r),
 		resultChanl:     r,
 		LimitThreadNumb: defaultThreadNumb,
+		UseRecord:       true,
 	}
 }
 
