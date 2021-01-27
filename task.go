@@ -3,6 +3,7 @@ package tasks
 import (
 	"context"
 	"reflect"
+	"time"
 )
 
 const defaultThreadNumb = 128
@@ -69,7 +70,10 @@ func (t *Task) wait() []*Result {
 	for r1 := range t.resultChanl {
 		res = append(res, r1)
 		t.watcher.Done(r1.index)
-		t.watcher.check()
+		if r1.index >= len(t.doms)-1 {
+			<-time.After(time.Microsecond * 10) //TODO remove time
+			t.watcher.check()
+		}
 	}
 	return res
 }

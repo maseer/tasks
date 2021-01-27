@@ -1,6 +1,6 @@
 package tasks
 
-type Handler func(data interface{}, ping *Ping) (interface{}, error)
+type Handler func(i interface{}, p *Ping) (interface{}, error)
 
 func (t *Task) upateWatcher(ps []*Ping) {
 	w := t.watcher
@@ -22,11 +22,19 @@ func (t *Task) next(ps []*Ping) {
 
 func (t *Task) runPing(ping *Ping) {
 	lt := t.doms[ping.Index]
-	resData, err := lt.runHandle(ping)
+	resData, err := t.runHandle(ping)
 	t.Fin(ping, resData, err)
 	if lt.next == nil || err != nil {
 		return
 	}
 	ps := handlePings(ping, resData)
 	t.next(ps)
+}
+
+func (t *Task) runHandle(ping *Ping) (interface{}, error) {
+	lt := t.doms[ping.Index]
+	lt.limit <- 0
+	a, err := lt.handleFunc(ping.Data, ping)
+	<-lt.limit
+	return a, err
 }

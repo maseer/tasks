@@ -31,10 +31,3 @@ func (t *Task) firstRun(ping *Ping) {
 	ps := handlePings(ping, ping.Data)
 	t.next(ps)
 }
-
-func (lt *Layout) runHandle(ping *Ping) (interface{}, error) {
-	lt.limit <- 0
-	a, err := lt.handleFunc(ping.Data, ping)
-	<-lt.limit
-	return a, err
-}
