@@ -9,8 +9,11 @@ type Ping struct {
 
 func newPing(data interface{}, result map[string]interface{}) *Ping {
 	return &Ping{
-		Data:   data,
-		Result: &Result{},
+		Data: data,
+		Result: &Result{
+			index: -1,
+		},
+		Index: -1,
 	}
 }
 

@@ -58,18 +58,17 @@ func (t *Task) startInit(data interface{}) {
 	p := newPing(data, make(map[string]interface{}))
 	p.ToMultiple = true
 	if len(t.doms) > 0 {
-		t.doms[0].start(p)
+		t.start(p)
 	} else {
-		t.resultChanl <- &Result{index: 1}
+		t.resultChanl <- &Result{index: 0}
 	}
 }
 
 func (t *Task) wait() []*Result {
 	res := []*Result{}
 	for r1 := range t.resultChanl {
-		i := r1.index
 		res = append(res, r1)
-		t.watcher.Done(i - 1)
+		t.watcher.Done(r1.index)
 		t.watcher.check()
 	}
 	return res

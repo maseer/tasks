@@ -7,7 +7,6 @@ type Result struct {
 	Err      error
 	initOnce sync.Once
 	index    int
-	Res      interface{}
 }
 
 func (r *Result) Init() {

@@ -27,14 +27,13 @@ func newLayout(id uintptr, t *Task, f Handler) *Layout {
 	return lt
 }
 
-func (lt *Layout) Fin(ping *Ping, res interface{}, err error) {
-	ping.Result.Res = res
+func (t *Task) Fin(ping *Ping, res interface{}, err error) {
 	if err != nil {
 		ping.Result.Err = err
 	}
-	lt.task.resultChanl <- ping.Result
+	t.resultChanl <- ping.Result
 }
 
-func (lt *Layout) start(p *Ping) {
-	lt.firstRun(p)
+func (t *Task) start(p *Ping) {
+	t.firstRun(p)
 }

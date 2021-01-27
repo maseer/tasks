@@ -19,7 +19,7 @@ func mustCopyPings(ping *Ping, data interface{}) []*Ping {
 	return ps
 }
 
-func (lt *Layout) handlePings(ping *Ping, data interface{}) []*Ping {
+func handlePings(ping *Ping, data interface{}) []*Ping {
 	if !ping.ToMultiple {
 		return []*Ping{ping.clone(data)}
 	}
@@ -27,25 +27,9 @@ func (lt *Layout) handlePings(ping *Ping, data interface{}) []*Ping {
 	return ps
 }
 
-func (lt *Layout) firstRun(ping *Ping) {
-	ps := lt.handlePings(ping, ping.Data)
-	next(ps, lt)
-}
-
-func next(ps []*Ping, next *Layout) {
-	next.upateWatcher(len(ps))
-	for _, v := range ps {
-		go runPing(v, next)
-	}
-}
-
-func (lt *Layout) upateWatcher(l int) {
-	w := lt.task.watcher
-	if l == -1 {
-		w.Done(lt.level)
-		return
-	}
-	w.Add(lt.level, l)
+func (t *Task) firstRun(ping *Ping) {
+	ps := handlePings(ping, ping.Data)
+	t.next(ps)
 }
 
 func (lt *Layout) runHandle(ping *Ping) (interface{}, error) {
@@ -53,14 +37,4 @@ func (lt *Layout) runHandle(ping *Ping) (interface{}, error) {
 	a, err := lt.handleFunc(ping.Data, ping)
 	<-lt.limit
 	return a, err
-}
-
-func runPing(ping *Ping, lt *Layout) {
-	resData, err := lt.runHandle(ping)
-	lt.Fin(ping, resData, err)
-	if lt.next == nil || err != nil {
-		return
-	}
-	ps := lt.handlePings(ping, resData)
-	next(ps, lt.next)
 }

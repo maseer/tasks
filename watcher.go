@@ -3,6 +3,7 @@ package tasks
 import (
 	"fmt"
 	"sync"
+	"time"
 )
 
 type watcher struct {
@@ -45,6 +46,10 @@ func (c *watcher) Done(step int) {
 }
 
 func (c *watcher) check() {
+	//test
+	<-time.After(time.Millisecond * 2)
+	//testend
+
 	pnt := ``
 	for _, v := range c.conter {
 		pnt += fmt.Sprintf("[%d/%d] ", v.fin, v.todo)
