@@ -28,6 +28,6 @@ func handlePings(ping *Ping, data interface{}) []*Ping {
 }
 
 func (t *Task) firstRun(ping *Ping) {
-	ps := handlePings(ping, ping.Data)
+	ps := handlePings(ping, ping.DataStart)
 	t.next(ps)
 }

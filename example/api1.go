@@ -26,7 +26,11 @@ func a2(data interface{}, ping *tasks.Ping) (interface{}, error) {
 	if s == `a7_a2` {
 		return nil, errors.New("a2 random error")
 	}
-	return fmt.Sprintf("%s_c", s), nil
+	r := fmt.Sprintf("%s_c", s)
+
+	fmt.Printf("__________%s", r)
+
+	return nil, nil
 }
 
 func api1() {

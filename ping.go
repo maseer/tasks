@@ -8,7 +8,8 @@ import (
 
 type Ping struct {
 	Result     *Result
-	Data       interface{}
+	DataStart  interface{}
+	DataEnd    interface{}
 	ToMultiple bool
 	Level      int
 	Error      error `json:"-"`
@@ -17,9 +18,9 @@ type Ping struct {
 
 func newPing(data interface{}, result map[string]interface{}) *Ping {
 	return &Ping{
-		Data:   data,
-		Result: &Result{},
-		Level:  -1,
+		DataStart: data,
+		Result:    &Result{},
+		Level:     -1,
 	}
 }
 
@@ -35,18 +36,18 @@ func cloneResult(src *Result) *Result {
 }
 
 func (p *Ping) Index() string {
-	bs, _ := json.Marshal(p.Data)
+	bs, _ := json.Marshal(p.DataStart)
 	md := md5.New()
 	s := md.Sum(bs)
-	r := fmt.Sprintf("%x", s)
+	r := fmt.Sprintf("%d_%x", p.Level, s)
 	return r
 }
 
 func (p *Ping) clone(data interface{}) *Ping {
 	clone := &Ping{
-		Result: cloneResult(p.Result),
-		Data:   data,
-		Level:  p.Level + 1,
+		Result:    cloneResult(p.Result),
+		DataStart: data,
+		Level:     p.Level + 1,
 	}
 	return clone
 }
