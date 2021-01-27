@@ -49,7 +49,7 @@ func (c *watcher) check() {
 	for _, v := range c.conter {
 		pnt += fmt.Sprintf("[%d/%d] ", v.fin, v.todo)
 	}
-	fmt.Printf("%s\r", pnt)
+	fmt.Printf("%s\n", pnt)
 	for _, v := range c.conter {
 		if v.fin < v.todo {
 			return

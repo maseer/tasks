@@ -4,6 +4,7 @@ type Ping struct {
 	Result     *Result
 	Data       interface{}
 	ToMultiple bool
+	Index      int
 }
 
 func newPing(data interface{}, result map[string]interface{}) *Ping {
@@ -30,6 +31,7 @@ func (p *Ping) clone(data interface{}) *Ping {
 	clone := &Ping{
 		Result: cloneResult(p.Result),
 		Data:   data,
+		Index:  p.Index + 1,
 	}
 	return clone
 }

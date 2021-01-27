@@ -4,7 +4,6 @@ import (
 	"context"
 )
 
-type Handler func(ping *Ping) (interface{}, error)
 type Layout struct {
 	ID         uintptr
 	handleFunc Handler

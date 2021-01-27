@@ -35,7 +35,7 @@ func (lt *Layout) firstRun(ping *Ping) {
 func next(ps []*Ping, next *Layout) {
 	next.upateWatcher(len(ps))
 	for _, v := range ps {
-		go run(v, next)
+		go runPing(v, next)
 	}
 }
 
@@ -50,12 +50,12 @@ func (lt *Layout) upateWatcher(l int) {
 
 func (lt *Layout) runHandle(ping *Ping) (interface{}, error) {
 	lt.limit <- 0
-	a, err := lt.handleFunc(ping)
+	a, err := lt.handleFunc(ping.Data, ping)
 	<-lt.limit
 	return a, err
 }
 
-func run(ping *Ping, lt *Layout) {
+func runPing(ping *Ping, lt *Layout) {
 	resData, err := lt.runHandle(ping)
 	lt.Fin(ping, resData, err)
 	if lt.next == nil || err != nil {
