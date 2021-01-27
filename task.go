@@ -14,14 +14,14 @@ type Task struct {
 	doms            []*Layout
 	index           int
 	watcher         *watcher
-	resultChanl     chan *Result
+	resultChanl     chan *Ping
 	preAdd          uintptr
 	LimitThreadNumb int
 }
 
 func New() *Task {
 	ctx, cancle := context.WithCancel(context.Background())
-	r := make(chan *Result)
+	r := make(chan *Ping)
 	return &Task{
 		cancle:          cancle,
 		ctx:             ctx,
@@ -61,16 +61,17 @@ func (t *Task) startInit(data interface{}) {
 	if len(t.doms) > 0 {
 		t.start(p)
 	} else {
-		t.resultChanl <- &Result{index: 0}
+		t.resultChanl <- p
 	}
 }
 
 func (t *Task) wait() []*Result {
 	res := []*Result{}
-	for r1 := range t.resultChanl {
-		res = append(res, r1)
-		t.watcher.Done(r1.index)
-		if r1.index >= len(t.doms)-1 {
+	for p := range t.resultChanl {
+		res = append(res, p.Result)
+		t.watcher.Done(p.Level)
+		t.End(p)
+		if p.Level >= len(t.doms)-1 {
 			<-time.After(time.Microsecond * 10) //TODO remove time
 			t.watcher.check()
 		}

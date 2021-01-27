@@ -4,9 +4,9 @@ import "sync"
 
 type Result struct {
 	data     map[string]interface{}
-	Err      error
+	// Err      error
 	initOnce sync.Once
-	index    int
+	// index    int
 }
 
 func (r *Result) Init() {

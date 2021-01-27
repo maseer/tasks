@@ -29,9 +29,10 @@ func newLayout(id uintptr, t *Task, f Handler) *Layout {
 
 func (t *Task) Fin(ping *Ping, res interface{}, err error) {
 	if err != nil {
-		ping.Result.Err = err
+		ping.Error = err
+		ping.HasError = true
 	}
-	t.resultChanl <- ping.Result
+	t.resultChanl <- ping
 }
 
 func (t *Task) start(p *Ping) {

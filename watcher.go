@@ -9,7 +9,7 @@ type watcher struct {
 	conter []*stepCounter
 	lock   sync.Mutex
 	max    int
-	result chan *Result
+	ping   chan *Ping
 }
 
 type stepCounter struct {
@@ -17,9 +17,9 @@ type stepCounter struct {
 	fin  int
 }
 
-func newWatcher(r chan *Result) *watcher {
+func newWatcher(r chan *Ping) *watcher {
 	return &watcher{
-		result: r,
+		ping: r,
 	}
 }
 
@@ -55,5 +55,5 @@ func (c *watcher) check() {
 			return
 		}
 	}
-	close(c.result)
+	close(c.ping)
 }

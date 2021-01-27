@@ -9,7 +9,7 @@ func (t *Task) upateWatcher(ps []*Ping) {
 		return
 	}
 	if len(ps) > 0 {
-		w.Add(ps[0].Index, len(ps))
+		w.Add(ps[0].Level, len(ps))
 	}
 }
 
@@ -21,7 +21,7 @@ func (t *Task) next(ps []*Ping) {
 }
 
 func (t *Task) runPing(ping *Ping) {
-	lt := t.doms[ping.Index]
+	lt := t.doms[ping.Level]
 	resData, err := t.runHandle(ping)
 	t.Fin(ping, resData, err)
 	if lt.next == nil || err != nil {
@@ -32,7 +32,7 @@ func (t *Task) runPing(ping *Ping) {
 }
 
 func (t *Task) runHandle(ping *Ping) (interface{}, error) {
-	lt := t.doms[ping.Index]
+	lt := t.doms[ping.Level]
 	lt.limit <- 0
 	a, err := lt.handleFunc(ping.Data, ping)
 	<-lt.limit

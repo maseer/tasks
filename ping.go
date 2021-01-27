@@ -1,19 +1,25 @@
 package tasks
 
+import (
+	"crypto/md5"
+	"encoding/json"
+	"fmt"
+)
+
 type Ping struct {
 	Result     *Result
 	Data       interface{}
 	ToMultiple bool
-	Index      int
+	Level      int
+	Error      error `json:"-"`
+	HasError   bool
 }
 
 func newPing(data interface{}, result map[string]interface{}) *Ping {
 	return &Ping{
-		Data: data,
-		Result: &Result{
-			index: -1,
-		},
-		Index: -1,
+		Data:   data,
+		Result: &Result{},
+		Level:  -1,
 	}
 }
 
@@ -23,10 +29,16 @@ func cloneResult(src *Result) *Result {
 		dstMap[k] = v
 	}
 	r := &Result{
-		data:  dstMap,
-		Err:   src.Err,
-		index: src.index + 1,
+		data: dstMap,
 	}
+	return r
+}
+
+func (p *Ping) Index() string {
+	bs, _ := json.Marshal(p.Data)
+	md := md5.New()
+	s := md.Sum(bs)
+	r := fmt.Sprintf("%x", s)
 	return r
 }
 
@@ -34,7 +46,7 @@ func (p *Ping) clone(data interface{}) *Ping {
 	clone := &Ping{
 		Result: cloneResult(p.Result),
 		Data:   data,
-		Index:  p.Index + 1,
+		Level:  p.Level + 1,
 	}
 	return clone
 }

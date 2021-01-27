@@ -24,7 +24,7 @@ func a1(data interface{}, ping *tasks.Ping) (interface{}, error) {
 func a2(data interface{}, ping *tasks.Ping) (interface{}, error) {
 	s := data.(string)
 	if s == `a7_a2` {
-		return nil, errors.New("error")
+		return nil, errors.New("a2 random error")
 	}
 	return fmt.Sprintf("%s_c", s), nil
 }
@@ -32,6 +32,5 @@ func a2(data interface{}, ping *tasks.Ping) (interface{}, error) {
 func api1() {
 	t := tasks.New()
 	t.Add(a0, a1, a2)
-	a := t.Begin([]int{5, 7, 8})
-	fmt.Println(a)
+	t.Begin([]int{5, 7, 8})
 }
