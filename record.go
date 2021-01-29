@@ -13,10 +13,8 @@ const recordFile = `save`
 
 type Record struct {
 	E bool //has error
-
 	S interface{}            //data start
 	M map[string]interface{} //result
-
 	R interface{} //data end
 }
 

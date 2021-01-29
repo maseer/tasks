@@ -2,5 +2,6 @@ package main
 
 func main() {
 
-	api1()
+	// api1()
+	apicustom()
 }
