@@ -9,23 +9,30 @@ import (
 
 const recordFile = `save.json`
 
-type Record map[string]*Ping
+type Record struct {
+	D interface{}            //data
+	E bool                   //has error
+	M map[string]interface{} //*result
+	R interface{}            //data resultd
+}
+
+type RecordMap map[string]*Record
 
 var dataRecord = mustReadRecord()
 var dataRecordLock sync.Mutex
 
-func newRecord() Record {
-	r1 := make(map[string]*Ping)
-	r2 := Record(r1)
+func newRecord() RecordMap {
+	r1 := make(map[string]*Record)
+	r2 := RecordMap(r1)
 	return r2
 }
 
-func mustReadRecord() Record {
+func mustReadRecord() RecordMap {
 	r, _ := readRecord()
 	return r
 }
 
-func readRecord() (Record, error) {
+func readRecord() (RecordMap, error) {
 	saveLock.Lock()
 	defer saveLock.Unlock()
 	if _, err := os.Stat(recordFile); err != nil {
@@ -36,7 +43,7 @@ func readRecord() (Record, error) {
 		return newRecord(), err
 	}
 	defer fi.Close()
-	var r Record
+	var r RecordMap
 	if err := json.NewDecoder(fi).Decode(&r); err != nil {
 		return newRecord(), err
 	}
@@ -45,7 +52,7 @@ func readRecord() (Record, error) {
 
 var saveLock sync.Mutex
 
-func (r *Record) save() error {
+func (r *RecordMap) save() error {
 	saveLock.Lock()
 	defer saveLock.Unlock()
 	fi, err := os.OpenFile(recordFile, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0777)
@@ -59,15 +66,14 @@ func (r *Record) save() error {
 	return nil
 }
 
-func (t *Task) End(p *Ping) {
+func (t *Task) record(p *Ping) {
 	if !t.UseRecord {
 		return
 	}
-
 	dataRecordLock.Lock()
 	defer dataRecordLock.Unlock()
 
-	dataRecord[p.Index()] = p
+	dataRecord[p.Index()] = p.toRecord(p.DataEnd)
 	if err := dataRecord.save(); err != nil {
 		fmt.Println(err)
 	}

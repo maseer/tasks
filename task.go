@@ -72,13 +72,17 @@ func (t *Task) wait() []*Result {
 	for p := range t.resultChanl {
 		res = append(res, p.Result)
 		t.watcher.Done(p.Level)
-		t.End(p)
-		if p.Level >= len(t.doms)-1 {
+		if t.isLast(p) {
+			t.record(p)
 			<-time.After(time.Microsecond * 10) //TODO remove time
 			t.watcher.check()
 		}
 	}
 	return res
+}
+
+func (t *Task) isLast(p *Ping) bool {
+	return len(t.doms) == p.Level+1
 }
 
 func (t *Task) Begin(data interface{}) []*Result {

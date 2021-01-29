@@ -32,6 +32,7 @@ func (t *Task) Fin(ping *Ping, res interface{}, err error) {
 		ping.Error = err
 		ping.HasError = true
 	}
+	ping.DataEnd = res
 	t.resultChanl <- ping
 }
 

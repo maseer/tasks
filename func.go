@@ -20,6 +20,14 @@ func (t *Task) next(ps []*Ping) {
 	}
 }
 
+func tryRecord(ping *Ping) (*Record, bool) {
+	dataRecordLock.Lock()
+	defer dataRecordLock.Unlock()
+	index := ping.Index()
+	f, ok := dataRecord[index]
+	return f, ok
+}
+
 func (t *Task) runPing(ping *Ping) {
 	lt := t.doms[ping.Level]
 	resData, err := t.runHandle(ping)
@@ -31,29 +39,18 @@ func (t *Task) runPing(ping *Ping) {
 	t.next(ps)
 }
 
-func runFromRecord(ping *Ping) (*Ping, bool) {
-	dataRecordLock.Lock()
-	defer dataRecordLock.Unlock()
-	index := ping.Index()
-	f, ok := dataRecord[index]
-	return f, ok
-}
-
 func (t *Task) runHandle(ping *Ping) (interface{}, error) {
-	nping, ok := runFromRecord(ping)
-	if t.UseRecord && ok && !nping.HasError {
-		ping.ToMultiple = nping.ToMultiple
-		ping.Result = nping.Result
-		ping.DataEnd = nping.DataEnd
-		return nping.DataEnd, nil
+	if t.UseRecord && t.isLast(ping) {
+		r, ok := tryRecord(ping)
+		if ok && !r.E {
+			return r.R, nil
+		}
 	}
-
 	lt := t.doms[ping.Level]
 	lt.limit <- 0
 	defer func() {
 		<-lt.limit
 	}()
 	i, err := lt.handleFunc(ping.DataStart, ping)
-	ping.DataEnd = i
 	return i, err
 }

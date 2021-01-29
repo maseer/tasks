@@ -37,8 +37,7 @@ func cloneResult(src *Result) *Result {
 
 func (p *Ping) Index() string {
 	bs, _ := json.Marshal(p.DataStart)
-	md := md5.New()
-	s := md.Sum(bs)
+	s := md5.Sum(bs)
 	r := fmt.Sprintf("%d_%x", p.Level, s)
 	return r
 }
@@ -50,4 +49,13 @@ func (p *Ping) clone(data interface{}) *Ping {
 		Level:     p.Level + 1,
 	}
 	return clone
+}
+func (p *Ping) toRecord(data interface{}) *Record {
+	r := &Record{
+		D: p.DataStart,
+		E: p.HasError,
+		M: p.Result.data,
+		R: data,
+	}
+	return r
 }
