@@ -51,8 +51,13 @@ func (p *Ping) clone(data interface{}) *Ping {
 	return clone
 }
 func (p *Ping) toRecord(data interface{}) *Record {
+	if !p.HasError {
+		return &Record{
+			R: data,
+		}
+	}
 	r := &Record{
-		D: p.DataStart,
+		S: p.DataStart,
 		E: p.HasError,
 		M: p.Result.data,
 		R: data,

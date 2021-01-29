@@ -18,6 +18,7 @@ func a0(data interface{}, ping *tasks.Ping) (interface{}, error) {
 }
 func a1(data interface{}, ping *tasks.Ping) (interface{}, error) {
 	s := data.(string)
+	ping.Result.Set("h", "ok")
 	return s, nil
 }
 
@@ -30,7 +31,7 @@ func a2(data interface{}, ping *tasks.Ping) (interface{}, error) {
 
 	fmt.Printf("__________%s", r)
 
-	return nil, nil
+	return "hello", nil
 }
 
 func api1() {

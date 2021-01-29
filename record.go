@@ -1,19 +1,50 @@
 package tasks
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"sync"
 )
 
-const recordFile = `save.json`
+const recordFile = `save`
 
 type Record struct {
-	D interface{}            //data
-	E bool                   //has error
-	M map[string]interface{} //*result
-	R interface{}            //data resultd
+	E bool //has error
+
+	S interface{}            //data start
+	M map[string]interface{} //result
+
+	R interface{} //data end
+}
+
+var sepRecord = []byte(`|`)
+
+func (r *Record) Encode() []byte {
+	if r.E {
+		return bytes.Join([][]byte{mustToS(r.S), mustToS(r.M)}, sepRecord)
+	}
+	return bytes.Join([][]byte{mustRtoS(r.R)}, sepRecord)
+}
+
+func Decode(s []byte) (*Record, error) {
+	rd := &Record{}
+	span := bytes.Split(s, sepRecord)
+	if len(span) == 1 {
+		rd.R = span[0]
+	} else {
+		rd.E = true
+		var rmp map[string]interface{}
+		err := json.Unmarshal(span[1], &rmp)
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+		rd.M = rmp
+	}
+	return rd, nil
 }
 
 type RecordMap map[string]*Record
@@ -38,21 +69,31 @@ func readRecord() (RecordMap, error) {
 	if _, err := os.Stat(recordFile); err != nil {
 		return newRecord(), err
 	}
-	fi, err := os.OpenFile(recordFile, os.O_CREATE|os.O_RDWR, 0777)
+
+	rm := make(map[string]*Record)
+
+	bs, err := ioutil.ReadFile(recordFile)
 	if err != nil {
-		return newRecord(), err
+		return nil, err
 	}
-	defer fi.Close()
-	var r RecordMap
-	if err := json.NewDecoder(fi).Decode(&r); err != nil {
-		return newRecord(), err
+	lines := bytes.Split(bs, []byte("\n"))
+	for _, v := range lines {
+		two := bytes.Split(v, []byte("::"))
+		if len(two) != 2 {
+			continue
+		}
+		d1, err := Decode(two[1])
+		if err != nil {
+			return nil, err
+		}
+		rm[fmt.Sprintf("%s", two[0])] = d1
 	}
-	return r, nil
+	return rm, nil
 }
 
 var saveLock sync.Mutex
 
-func (r *RecordMap) save() error {
+func (mr *RecordMap) save() error {
 	saveLock.Lock()
 	defer saveLock.Unlock()
 	fi, err := os.OpenFile(recordFile, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0777)
@@ -60,9 +101,18 @@ func (r *RecordMap) save() error {
 		return err
 	}
 	defer fi.Close()
-	if err := json.NewEncoder(fi).Encode(r); err != nil {
-		return err
+
+	for k, v := range *mr {
+		fi.Write([]byte(fmt.Sprintf("%s::", k)))
+		fi.Write(v.Encode())
+		fi.Write([]byte("\n"))
+
 	}
+
+	// if err := json.NewEncoder(fi).Encode(r); err != nil {
+	// 	return err
+	// }
+
 	return nil
 }
 
@@ -78,3 +128,30 @@ func (t *Task) record(p *Ping) {
 		fmt.Println(err)
 	}
 }
+
+func mustRtoS(v interface{}) []byte {
+	if v == nil {
+		return []byte{}
+	}
+	return []byte(fmt.Sprintf("%s", v))
+}
+
+func mustToS(v interface{}) []byte {
+	bs, err := json.Marshal(v)
+	if err != nil {
+		return []byte{}
+	}
+	return bs
+}
+
+// func mustItoM(s string) map[string]interface{} {
+// 	r := make(map[string]interface{})
+// 	json.Unmarshal([]byte(s), &r)
+// 	return r
+// }
+
+// func mustMtoI(s string) map[string]interface{} {
+// 	r := make(map[string]interface{})
+// 	json.Unmarshal([]byte(s), &r)
+// 	return r
+// }
