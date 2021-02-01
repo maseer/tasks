@@ -31,6 +31,7 @@ func tryRecord(ping *Ping) (*Record, bool) {
 func (t *Task) runPing(ping *Ping) {
 	lt := t.doms[ping.Level]
 	resData, err := t.runHandle(ping)
+
 	t.Fin(ping, resData, err)
 	if lt.next == nil || err != nil {
 		return
@@ -39,16 +40,22 @@ func (t *Task) runPing(ping *Ping) {
 	t.next(ps)
 }
 
-func (t *Task) runHandle(ping *Ping) (interface{}, error) {
+func (t *Task) runHandle(ping *Ping) (idata interface{}, err error) {
 	if t.cfg.UseRecord && t.isLast(ping) {
 		r, ok := tryRecord(ping)
 		if ok && !r.E {
-			return r.R, nil
+			idata = r
+			return
 		}
 	}
 	lt := t.doms[ping.Level]
 	lt.limit <- 0
-	i, err := lt.handleFunc(ping.DataStart, ping)
+	for i := 0; i < t.cfg.RetryTimes+1; i++ {
+		idata, err = lt.handleFunc(ping.DataStart, ping)
+		if err == nil {
+			break
+		}
+	}
 	<-lt.limit
-	return i, err
+	return
 }

@@ -6,10 +6,11 @@ import (
 )
 
 type watcher struct {
-	conter []*stepCounter
-	lock   sync.Mutex
-	max    int
-	ping   chan *Ping
+	conter   []*stepCounter
+	lock     sync.Mutex
+	max      int
+	ping     chan *Ping
+	disabled bool
 }
 
 type stepCounter struct {
@@ -17,9 +18,10 @@ type stepCounter struct {
 	fin  int
 }
 
-func newWatcher(r chan *Ping) *watcher {
+func newWatcher(r chan *Ping, disabled bool) *watcher {
 	return &watcher{
-		ping: r,
+		ping:     r,
+		disabled: disabled,
 	}
 }
 
@@ -46,10 +48,12 @@ func (c *watcher) Done(step int) {
 
 func (c *watcher) check() {
 	pnt := ``
-	for _, v := range c.conter {
-		pnt += fmt.Sprintf("[%d/%d] ", v.fin, v.todo)
+	if !c.disabled {
+		for _, v := range c.conter {
+			pnt += fmt.Sprintf("[%d/%d] ", v.fin, v.todo)
+		}
+		fmt.Printf("%s\r", pnt)
 	}
-	fmt.Printf("%s\r", pnt)
 	for _, v := range c.conter {
 		if v.fin < v.todo {
 			return

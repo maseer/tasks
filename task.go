@@ -20,8 +20,10 @@ type Task struct {
 }
 
 type TaskConfig struct {
-	ThreadNumb int
-	UseRecord  bool
+	ThreadNumb    int
+	UseRecord     bool
+	DisableOutput bool
+	RetryTimes    int
 }
 
 func New() *Task {
@@ -30,7 +32,6 @@ func New() *Task {
 	return &Task{
 		cancle:      cancle,
 		ctx:         ctx,
-		watcher:     newWatcher(r),
 		resultChanl: r,
 		cfg: TaskConfig{
 			ThreadNumb: defaultThreadNumb,
@@ -40,18 +41,12 @@ func New() *Task {
 }
 
 func NewWithCfg(cfg TaskConfig) *Task {
-	ctx, cancle := context.WithCancel(context.Background())
-	r := make(chan *Ping)
+	tk := New()
 	if cfg.ThreadNumb == 0 {
 		cfg.ThreadNumb = defaultThreadNumb
 	}
-	return &Task{
-		cancle:      cancle,
-		ctx:         ctx,
-		watcher:     newWatcher(r),
-		resultChanl: r,
-		cfg:         cfg,
-	}
+	tk.cfg = cfg
+	return tk
 }
 
 func (t *Task) SetLimit(threadNumb int) {
@@ -92,6 +87,7 @@ func (t *Task) startInit(data interface{}) {
 	for _, lt := range t.doms {
 		lt.limit = make(chan int, t.cfg.ThreadNumb)
 	}
+	t.watcher = newWatcher(t.resultChanl, t.cfg.DisableOutput)
 	if len(t.doms) > 0 {
 		t.start(p)
 	} else {
