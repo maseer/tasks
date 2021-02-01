@@ -16,8 +16,7 @@ type Task struct {
 	watcher     *watcher
 	resultChanl chan *Ping
 	preAdd      uintptr
-	// UseRecord   bool
-	cfg *TaskConfig
+	cfg         TaskConfig
 }
 
 type TaskConfig struct {
@@ -33,10 +32,25 @@ func New() *Task {
 		ctx:         ctx,
 		watcher:     newWatcher(r),
 		resultChanl: r,
-		cfg: &TaskConfig{
+		cfg: TaskConfig{
 			ThreadNumb: defaultThreadNumb,
 			UseRecord:  true,
 		},
+	}
+}
+
+func NewWithCfg(cfg TaskConfig) *Task {
+	ctx, cancle := context.WithCancel(context.Background())
+	r := make(chan *Ping)
+	if cfg.ThreadNumb == 0 {
+		cfg.ThreadNumb = defaultThreadNumb
+	}
+	return &Task{
+		cancle:      cancle,
+		ctx:         ctx,
+		watcher:     newWatcher(r),
+		resultChanl: r,
+		cfg:         cfg,
 	}
 }
 

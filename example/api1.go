@@ -28,14 +28,15 @@ func a2(data interface{}, ping *tasks.Ping) (interface{}, error) {
 	if s == `a7_a2` {
 		return nil, errors.New("a2 random error")
 	}
-	time.Sleep(time.Millisecond * 200)
+	time.Sleep(time.Millisecond * 120)
 	return "hello", nil
 }
 
 func api1() {
-	t := tasks.New()
+	t := tasks.NewWithCfg(tasks.TaskConfig{
+		ThreadNumb: 2,
+		UseRecord:  false,
+	})
 	t.Add(a0, a1, a2)
-	t.SetUsingRecord(false)
-	t.SetLimit(1)
 	t.Begin([]int{5, 7, 8, 9, 10, 11})
 }
