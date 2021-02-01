@@ -36,6 +36,16 @@ func cloneResult(src *Result) *Result {
 }
 
 func (p *Ping) Index() string {
+	// if s, ok := p.DataStart.(string); ok {
+	// 	s2 := base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString([]byte(s))
+	// 	return fmt.Sprintf("%d_string_%s", p.Level, s2)
+	// }
+	// if s, ok := p.DataStart.(int); ok {
+	// 	return fmt.Sprintf("%d_int_%d", p.Level, s)
+	// }
+	// if s, ok := p.DataStart.(float64); ok {
+	// 	return fmt.Sprintf("%d_float_%f", p.Level, s)
+	// }
 	bs, _ := json.Marshal(p.DataStart)
 	s := md5.Sum(bs)
 	r := fmt.Sprintf("%d_%x", p.Level, s)

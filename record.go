@@ -12,10 +12,10 @@ import (
 const recordFile = `save`
 
 type Record struct {
-	E bool //has error
+	E bool                   //has error
 	S interface{}            //data start
 	M map[string]interface{} //result
-	R interface{} //data end
+	R interface{}            //data end
 }
 
 var sepRecord = []byte(`|`)
@@ -106,11 +106,6 @@ func (mr *RecordMap) save() error {
 		fi.Write([]byte("\n"))
 
 	}
-
-	// if err := json.NewEncoder(fi).Encode(r); err != nil {
-	// 	return err
-	// }
-
 	return nil
 }
 
@@ -141,15 +136,3 @@ func mustToS(v interface{}) []byte {
 	}
 	return bs
 }
-
-// func mustItoM(s string) map[string]interface{} {
-// 	r := make(map[string]interface{})
-// 	json.Unmarshal([]byte(s), &r)
-// 	return r
-// }
-
-// func mustMtoI(s string) map[string]interface{} {
-// 	r := make(map[string]interface{})
-// 	json.Unmarshal([]byte(s), &r)
-// 	return r
-// }

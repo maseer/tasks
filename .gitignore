@@ -4,3 +4,4 @@ tmp
 save.json
 apicustom.go
 save
+example/main.go
