@@ -110,7 +110,7 @@ func (mr *RecordMap) save() error {
 }
 
 func (t *Task) record(p *Ping) {
-	if !t.UseRecord {
+	if !t.cfg.UseRecord {
 		return
 	}
 	dataRecordLock.Lock()

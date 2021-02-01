@@ -9,28 +9,43 @@ import (
 const defaultThreadNumb = 128
 
 type Task struct {
-	ctx             context.Context
-	cancle          func()
-	doms            []*Layout
-	index           int
-	watcher         *watcher
-	resultChanl     chan *Ping
-	preAdd          uintptr
-	LimitThreadNumb int
-	UseRecord       bool
+	ctx         context.Context
+	cancle      func()
+	doms        []*Layout
+	index       int
+	watcher     *watcher
+	resultChanl chan *Ping
+	preAdd      uintptr
+	// UseRecord   bool
+	cfg *TaskConfig
+}
+
+type TaskConfig struct {
+	ThreadNumb int
+	UseRecord  bool
 }
 
 func New() *Task {
 	ctx, cancle := context.WithCancel(context.Background())
 	r := make(chan *Ping)
 	return &Task{
-		cancle:          cancle,
-		ctx:             ctx,
-		watcher:         newWatcher(r),
-		resultChanl:     r,
-		LimitThreadNumb: defaultThreadNumb,
-		UseRecord:       true,
+		cancle:      cancle,
+		ctx:         ctx,
+		watcher:     newWatcher(r),
+		resultChanl: r,
+		cfg: &TaskConfig{
+			ThreadNumb: defaultThreadNumb,
+			UseRecord:  true,
+		},
 	}
+}
+
+func (t *Task) SetLimit(threadNumb int) {
+	t.cfg.ThreadNumb = threadNumb
+}
+
+func (t *Task) SetUsingRecord(is bool) {
+	t.cfg.UseRecord = is
 }
 
 func (t *Task) bindPre(dom *Layout, pre uintptr) {
@@ -60,6 +75,9 @@ func (t *Task) addOne(f Handler) {
 func (t *Task) startInit(data interface{}) {
 	p := newPing(data, make(map[string]interface{}))
 	p.ToMultiple = true
+	for _, lt := range t.doms {
+		lt.limit = make(chan int, t.cfg.ThreadNumb)
+	}
 	if len(t.doms) > 0 {
 		t.start(p)
 	} else {

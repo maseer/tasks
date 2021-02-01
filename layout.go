@@ -22,7 +22,6 @@ func newLayout(id uintptr, t *Task, f Handler) *Layout {
 		ctx:        t.ctx,
 		level:      t.index,
 		task:       t,
-		limit:      make(chan int, t.LimitThreadNumb),
 	}
 	return lt
 }

@@ -40,7 +40,7 @@ func (t *Task) runPing(ping *Ping) {
 }
 
 func (t *Task) runHandle(ping *Ping) (interface{}, error) {
-	if t.UseRecord && t.isLast(ping) {
+	if t.cfg.UseRecord && t.isLast(ping) {
 		r, ok := tryRecord(ping)
 		if ok && !r.E {
 			return r.R, nil
@@ -48,9 +48,7 @@ func (t *Task) runHandle(ping *Ping) (interface{}, error) {
 	}
 	lt := t.doms[ping.Level]
 	lt.limit <- 0
-	defer func() {
-		<-lt.limit
-	}()
 	i, err := lt.handleFunc(ping.DataStart, ping)
+	<-lt.limit
 	return i, err
 }

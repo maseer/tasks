@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/maseer/tasks"
 )
@@ -27,15 +28,14 @@ func a2(data interface{}, ping *tasks.Ping) (interface{}, error) {
 	if s == `a7_a2` {
 		return nil, errors.New("a2 random error")
 	}
-	r := fmt.Sprintf("%s_c", s)
-
-	fmt.Printf("__________%s", r)
-
+	time.Sleep(time.Millisecond * 200)
 	return "hello", nil
 }
 
 func api1() {
 	t := tasks.New()
 	t.Add(a0, a1, a2)
-	t.Begin([]int{5, 7, 8})
+	t.SetUsingRecord(false)
+	t.SetLimit(1)
+	t.Begin([]int{5, 7, 8, 9, 10, 11})
 }
